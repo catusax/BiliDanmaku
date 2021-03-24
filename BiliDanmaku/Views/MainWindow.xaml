@@ -1,0 +1,62 @@
+﻿<Window x:Class="BiliDanmaku.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        xmlns:local="clr-namespace:BiliDanmaku" xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        Title="BiliBili弹幕" Height="400" Width="500" MinHeight="300" MinWidth="400">
+    <Window.Resources>
+        <Style x:Key="btnstyle" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="10 0"/>
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Background" Value="Black" />
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <DataTemplate x:Key="outputlist">
+            <WrapPanel Orientation="Horizontal">
+                <hc:SimpleText Foreground="Red" Text="{Binding User,FallbackValue=qwer}" Margin="10 5" FontSize="16"/>
+                <hc:SimpleText Text=":" FontSize="16"/>
+                <hc:SimpleText TextWrapping = "Wrap" Foreground="Black" Text="{Binding Message,FallbackValue=test}" Margin="10 5" FontSize="16"/>
+            </WrapPanel>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" MinHeight="50"/>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="6*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <hc:TextBox x:Name="roomidbox" Grid.Column="0" AcceptsReturn="False" Text="{Binding RoomId}"
+                        Margin="10 10" MaxHeight="30" hc:InfoElement.Placeholder="输入直播间号" hc:TextType="Digits" ShowClearButton="True"
+                        IsReadOnly="{Binding CanNotEdit}"
+                        >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="TextChanged">
+                        <i:InvokeCommandAction Command="{Binding RoomIdChanged}" CommandParameter="{Binding ElementName=roomidbox}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </hc:TextBox>
+            
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Style="{DynamicResource btnstyle}" Content="连接" Command="{Binding Connect}" IsEnabled="{Binding CanConnect}"/>
+                <Button Style="{DynamicResource btnstyle}" Content="停止" Command="{Binding DisConnect}"/>
+                <Button Style="{DynamicResource btnstyle}" Content="清屏" Command="{Binding Clear}"/>
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="1">
+            <TextBlock Grid.Row="1" Text="{Binding Pop}" Margin="15 0" VerticalAlignment="Top" FontSize="14"/>
+        </StackPanel>
+        <ScrollViewer Style="{StaticResource ScrollViewerUpDown}" VerticalScrollBarVisibility="Auto" Grid.Row="2" x:Name="outputbox" ScrollChanged="outputbox_ScrollChanged">
+            <ItemsControl Margin="15" ItemTemplate="{StaticResource outputlist}" ItemsSource="{Binding Danmakus}"/>
+        </ScrollViewer>
+    </Grid>
+</Window>
