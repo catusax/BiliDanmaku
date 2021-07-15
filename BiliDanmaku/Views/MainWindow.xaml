@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        xmlns:local="clr-namespace:BiliDanmaku" xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="BiliBili弹幕" Height="400" Width="500" MinHeight="300" MinWidth="400">
     <Window.Resources>
@@ -16,6 +16,7 @@
             <Setter Property="Background" Value="Black" />
             <Setter Property="Foreground" Value="White"/>
         </Style>
+        <!--  弹幕显示的样式 -->
         <DataTemplate x:Key="outputlist">
             <WrapPanel Orientation="Horizontal">
                 <hc:SimpleText Foreground="Red" Text="{Binding User,FallbackValue=qwer}" Margin="10 5" FontSize="16"/>
@@ -55,7 +56,7 @@
         <StackPanel Grid.Row="1">
             <TextBlock Grid.Row="1" Text="{Binding Pop}" Margin="15 0" VerticalAlignment="Top" FontSize="14"/>
         </StackPanel>
-        <ScrollViewer Style="{StaticResource ScrollViewerUpDown}" VerticalScrollBarVisibility="Auto" Grid.Row="2" x:Name="outputbox" ScrollChanged="outputbox_ScrollChanged">
+        <ScrollViewer  VerticalScrollBarVisibility="Auto" Grid.Row="2" x:Name="outputbox" ScrollChanged="outputbox_ScrollChanged">
             <ItemsControl Margin="15" ItemTemplate="{StaticResource outputlist}" ItemsSource="{Binding Danmakus}"/>
         </ScrollViewer>
     </Grid>

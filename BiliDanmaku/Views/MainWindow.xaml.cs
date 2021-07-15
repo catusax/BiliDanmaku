@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 
 namespace BiliDanmaku.Views
 {
@@ -19,14 +18,19 @@ namespace BiliDanmaku.Views
         private void outputbox_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
         {
             if (e.VerticalChange == 0 && autoscroll)
+            {
                 outputbox.ScrollToEnd();
+            }
+
             if (e.VerticalOffset == outputbox.ScrollableHeight) //滑到底就启用自动滚动
             {
                 autoscroll = true;
                 outputbox.ScrollToEnd();
             }
             else
+            {
                 autoscroll = false;
+            }
         }
     }
 }

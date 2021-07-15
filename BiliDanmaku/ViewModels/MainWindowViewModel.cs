@@ -1,7 +1,6 @@
 ﻿using Prism.Mvvm;
 using Prism.Commands;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Windows.Threading;
@@ -12,43 +11,46 @@ namespace ViewModels
 {
     public class MainWindowViewModel : BindableBase
     {
-        private BiliDanmaku.services.DanmakuAPi api = null;
+        private readonly BiliDanmaku.services.DanmakuAPi api;
         public DelegateCommand Connect { get; private set; }
-        private bool _canConnect = false;
+        private bool _canConnect;
         public DelegateCommand Clear { get; private set; }
         public DelegateCommand DisConnect { get; private set; }
-        private bool _canDisConnect = false;
+        private bool _canDisConnect;
 
         public DelegateCommand<TextBox> RoomIdChanged { get; private set; }
 
         public MainWindowViewModel(BiliDanmaku.services.DanmakuAPi danmaku)
         {
             Connect = new DelegateCommand(async () => await ConnectDanmaku());
-            DisConnect = new DelegateCommand(async () => await DisConnectDanmaku()).ObservesCanExecute(()=>CanDisConnect);
+            DisConnect = new DelegateCommand(async () => await DisConnectDanmaku()).ObservesCanExecute(() => CanDisConnect);
             Clear = new DelegateCommand(ClearDanmaku);
-            RoomIdChanged = new DelegateCommand<TextBox>(roomidChanged);
+            RoomIdChanged = new DelegateCommand<TextBox>(RoomidChanged);
 
             api = danmaku;
             Pop = "";
             //接收到弹幕的事件
             api.SetOnDanmaku((BiliDanmaku.services.Danmaku danmaku) =>
             {
-                
-                ThreadPool.QueueUserWorkItem(delegate
-                {
-                    SynchronizationContext.SetSynchronizationContext(new
-                        DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                    SynchronizationContext.Current.Post(pl =>
-                    {
-                        //里面写真正的业务内容
-                        Danmakus.Add(danmaku);
-                        if (Danmakus.Count > 500) Danmakus.RemoveAt(0); //限制弹幕数量
-                    }, null);
-                });
+
+                _ = ThreadPool.QueueUserWorkItem(delegate
+                  {
+                      SynchronizationContext.SetSynchronizationContext(new
+                          DispatcherSynchronizationContext(Application.Current.Dispatcher));
+                      SynchronizationContext.Current.Post(pl =>
+                      {
+                          //里面写真正的业务内容
+                          Danmakus.Add(danmaku);
+                          if (Danmakus.Count > 500)
+                          {
+                              Danmakus.RemoveAt(0); //限制弹幕数量
+                          }
+                      }, null);
+                  });
             });
 
             //接收到热度信息的事件,已经进入房间
-            api.SetOnPop((num)=>
+            api.SetOnPop((num) =>
             {
                 Pop = $"当前直播间人气值: {num}";
             });
@@ -63,7 +65,7 @@ namespace ViewModels
             });
 
             //断开连接的事件
-            api.SetOnClose((sender,e) =>
+            api.SetOnClose((sender, e) =>
             {
                 CanConnect = true;
                 CanDisConnect = false;
@@ -80,27 +82,23 @@ namespace ViewModels
 
         public ObservableCollection<BiliDanmaku.services.Danmaku> Danmakus { get; set; } = new ObservableCollection<BiliDanmaku.services.Danmaku> { };
 
-        private bool _canNotEdit = false;
+        private bool _canNotEdit;
 
         private string _Pop;
         public string Pop
         {
             get => _Pop;
-            set
-            {
-                SetProperty(ref _Pop, value);
-            }
+            set => SetProperty(ref _Pop, value);
         }
 
         private string roomId;
         public bool CanConnect { get => _canConnect; set => SetProperty(ref _canConnect, value); }
         public bool CanDisConnect { get => _canDisConnect; set => SetProperty(ref _canDisConnect, value); }
-        public bool CanNotEdit { get => _canNotEdit; set { SetProperty(ref _canNotEdit, value); } }
+        public bool CanNotEdit { get => _canNotEdit; set => _ = SetProperty(ref _canNotEdit, value); }
 
-        public string RoomId { get => roomId; set
-            {
-                SetProperty(ref roomId, value);
-            }
+        public string RoomId
+        {
+            get => roomId; set => SetProperty(ref roomId, value);
         }
 
         private async Task ConnectDanmaku()
@@ -109,7 +107,7 @@ namespace ViewModels
             CanDisConnect = true;
             CanNotEdit = true;
             api.SetRoomId(RoomId);
-            await Task.Run(()=> api.Connect());
+            await Task.Run(() => api.Connect());
         }
 
         private void ClearDanmaku()
@@ -120,12 +118,13 @@ namespace ViewModels
         private async Task DisConnectDanmaku()
         {
             CanDisConnect = false;
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 api.Close();
             });
         }
 
-        private void roomidChanged(TextBox textBox)
+        private void RoomidChanged(TextBox textBox)
         {
             if (textBox.Text == string.Empty) //不能为空
             {
